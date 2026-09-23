@@ -82,28 +82,26 @@
   .us .tally { background:var(--emerald-500); color:#fff; }
   .note { margin-top:1rem; font-size:.75rem; border-radius:.5rem; padding:.75rem; background:var(--blue-50); border:1px solid var(--blue-200); color:var(--blue-800); }
 
-  /* Structure tree */
-  .tree { display:grid; grid-template-columns:repeat(4, 1fr); gap:.5rem; align-items:stretch; }
-  .lvl { border:2px solid; border-radius:.75rem; padding:.75rem; position:relative; }
-  .lvl .k { font-size:.64rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.7; }
-  .lvl .v { font-size:.85rem; font-weight:700; margin:.2rem 0 .5rem; }
-  .lvl .fix { font-size:.7rem; font-family:ui-monospace, Menlo, Consolas, monospace; background:#fff; border-radius:.35rem; padding:.2rem .4rem; display:inline-block; }
-  .lvl .fix + .fix { margin-left:.25rem; }
-  .l-co { border-color:var(--indigo-300); background:var(--indigo-50); color:var(--indigo-700); }
-  .l-gr { border-color:var(--blue-200); background:var(--blue-50); color:var(--blue-700); }
-  .l-lo { border-color:var(--purple-300); background:var(--purple-50); color:var(--purple-700); }
-  .l-ve { border-color:var(--emerald-300); background:var(--emerald-50); color:var(--emerald-700); }
-  .l-inv { border-color:var(--slate-800); background:var(--slate-800); color:#fff; }
-  .l-inv .k { color:var(--slate-400); opacity:1; }
-  .l-inv .fix { background:transparent; font-size:1rem; font-weight:700; letter-spacing:.06em; padding:0; }
+  /* Behind the scenes: ERP fields strip */
   .scene { border:2px solid var(--emerald-300); }
   .scene h3 { font-size:1.05rem; }
-  .scene .lvl { padding:1rem; }
-  .scene .lvl .v { font-size:.95rem; }
+  .fields { display:grid; grid-template-columns:repeat(5, 1fr); gap:.5rem; }
+  .tok { font-family:ui-monospace, Menlo, Consolas, monospace; font-weight:700; font-size:.78rem; letter-spacing:.05em;
+         background:var(--slate-800); text-align:center; padding:.6rem .25rem; }
+  .tok:first-child { border-radius:.5rem 0 0 .5rem; } .tok:nth-child(5) { border-radius:0 .5rem .5rem 0; }
+  .c-other { color:var(--slate-300); }
+  .fld { border:2px solid var(--slate-200); border-radius:.75rem; padding:.85rem; background:#fff; display:flex; flex-direction:column; gap:.35rem; }
+  .fld.auto { border-color:var(--emerald-300); background:var(--emerald-50); }
+  .fld .nm { font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.4rem; }
+  .fld .what { font-size:.72rem; color:var(--slate-500); }
+  .fld .pill { align-self:flex-start; margin-top:.2rem; }
+  .fld .how { font-size:.72rem; color:var(--slate-600); }
+  .bracket { font-size:.75rem; font-weight:700; text-align:center; padding:.45rem; border-radius:.5rem; }
+  .b-us { grid-column:1 / 4; background:var(--emerald-500); color:#fff; }
+  .b-team { grid-column:4 / 6; background:var(--slate-100); color:var(--slate-600); }
+  .p-rule { background:var(--slate-100); color:var(--slate-600); border:1px solid var(--slate-200); }
   .scene-foot { margin-top:.9rem; font-size:.8rem; color:var(--emerald-800); background:var(--emerald-50);
                 border:1px solid var(--emerald-200); border-radius:.5rem; padding:.6rem .75rem; }
-  .lvl:not(:last-child)::after { content:"→"; position:absolute; right:-.55rem; top:50%; transform:translate(50%,-50%);
-                                 color:var(--slate-400); font-weight:700; z-index:1; }
 
   /* Calculator */
   .calc { display:grid; grid-template-columns:1.2fr 1fr; gap:1.5rem; align-items:center; }
@@ -142,11 +140,10 @@
   @media (max-width: 760px) {
     .wrap { padding:0 1rem; }
     .hero-grid, .vs, .calc { grid-template-columns:1fr; }
-    .tree { grid-template-columns:1fr 1fr; gap:1rem; }
-    .lvl:not(:last-child)::after { display:none; }
+    .fields { grid-template-columns:1fr; }
+    .tok, .bracket { display:none; }
     .hero h2 { font-size:1.4rem; }
     .teams { grid-template-columns:1fr; }
-    .l-inv { grid-column:1 / -1; }
   }
 </style>
 <script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
@@ -164,9 +161,9 @@
   <div class="wrap hero-grid">
     <div>
       <h2>Set your structure once. Every invoice lands already coded.</h2>
-      <p>Ottimate ties your entities, stores and departments to your GL string. When an invoice reaches a location, every code that location owns is filled in before anyone opens it. Typical AP tools make your team pick those codes on every invoice.</p>
+      <p>Before an invoice can post to your ERP, it has to be coded to an entity, a location, a department and a GL account, and often more. Ottimate fills in entity, location and department from your setup, so your team never maps them. Typical AP tools make your team map them on every invoice.</p>
     </div>
-    <div class="big"><div class="n">Up to 75%</div><div class="l">less coding per invoice</div></div>
+    <div class="big"><div class="n">Up to 75%</div><div class="l">less mapping per invoice</div></div>
   </div>
 </section>
 
@@ -176,37 +173,46 @@
   <div class="card scene">
     <div class="card-head">
       <div>
-        <h3>Behind the scenes: your team never makes these coding calls</h3>
-        <p class="cap">Set up once, each level fills its own part of the GL string on every invoice.</p>
+        <h3>Behind the scenes: what your ERP needs on every invoice, and who fills it in</h3>
+        <p class="cap">Your ERP only accepts an invoice once every one of these fields is coded.</p>
       </div>
     </div>
-    <div class="tree" id="tree"></div>
-    <div class="scene-foot"><b>Set up correctly, nobody on your team picks a code.</b> They just approve the invoice.</div>
+    <div class="fields">
+      <div class="tok c-entity">ENTITY</div><div class="tok c-location">LOCATION</div><div class="tok c-dept">DEPARTMENT</div><div class="tok c-natural">GL ACCOUNT</div><div class="tok c-other">OTHER</div>
+      <div class="bracket b-us">Ottimate handles these. Your team never maps them.</div>
+      <div class="bracket b-team">Your team confirms, with suggestions</div>
+      <div class="fld auto"><div class="nm"><span class="dot d-entity"></span>Entity</div><div class="what">Which company or LLC</div><span class="pill p-auto">Never mapped</span><div class="how">Set by your company structure.</div></div>
+      <div class="fld auto"><div class="nm"><span class="dot d-location"></span>Location</div><div class="what">Which store or site</div><span class="pill p-auto">Never mapped</span><div class="how">Set by the location the invoice lands in.</div></div>
+      <div class="fld auto"><div class="nm"><span class="dot d-dept"></span>Department</div><div class="what">Which department</div><span class="pill p-auto">Never mapped</span><div class="how">Set by the location, or the department within it.</div></div>
+      <div class="fld"><div class="nm"><span class="dot d-natural"></span>GL account</div><div class="what">What was bought</div><span class="pill p-confirm">Confirm</span><div class="how">Suggested by the vendor's default GL or your mapping rules.</div></div>
+      <div class="fld"><div class="nm"><span class="dot" style="background:var(--slate-400)"></span>Other fields</div><div class="what">Class, project, fund and more</div><span class="pill p-rule">By rule</span><div class="how">Filled by location or rule wherever the value is fixed.</div></div>
+    </div>
+    <div class="scene-foot"><b>Typical AP tools leave every one of these to your team, on every invoice.</b> Taking entity, location and department off the table is time other AP software cannot give back.</div>
   </div>
 
   <!-- 1. Side by side -->
   <div class="card">
     <div class="card-head">
       <div>
-        <h3>What your team codes on every invoice</h3>
-        <p class="cap">The longer your GL string, the more Ottimate fills in for you.</p>
+        <h3>What your team maps on every invoice</h3>
+        <p class="cap">The more fields your ERP needs, the more Ottimate fills in for you.</p>
       </div>
-      <div class="toggle" role="group" aria-label="GL string length">
-        <button type="button" data-mode="three" aria-pressed="false">3-part GL string</button>
-        <button type="button" data-mode="four" aria-pressed="true">4-part GL string</button>
+      <div class="toggle" role="group" aria-label="Fields your ERP needs">
+        <button type="button" data-mode="three" aria-pressed="false">3 fields</button>
+        <button type="button" data-mode="four" aria-pressed="true">4 fields</button>
       </div>
     </div>
     <div class="vs">
       <div class="side them">
         <div class="side-title">Typical AP tool</div>
-        <div class="side-sub">Every invoice starts blank. Someone picks each code.</div>
+        <div class="side-sub">Every invoice starts blank. Someone maps each field.</div>
         <div class="gl" id="gl-them"></div>
         <div class="segs" id="segs-them"></div>
         <div class="tally" id="tally-them"></div>
       </div>
       <div class="side us">
         <div class="side-title">Ottimate</div>
-        <div class="side-sub">The invoice inherits its codes from where it lands.</div>
+        <div class="side-sub">The invoice inherits its coding from where it lands.</div>
         <div class="gl" id="gl-us"></div>
         <div class="segs" id="segs-us"></div>
         <div class="tally" id="tally-us"></div>
@@ -229,13 +235,13 @@
         <div class="vol"><span id="vol-out">3,000</span> <small>invoices / month</small></div>
         <input type="range" id="vol" min="100" max="25000" step="100" value="3000" />
         <div class="secs">
-          <label for="secs" style="margin:0">Seconds to pick one code</label>
+          <label for="secs" style="margin:0">Seconds to map one field</label>
           <input type="number" id="secs" min="1" max="120" value="15" />
         </div>
       </div>
       <div class="stats">
-        <div class="stat"><div class="n" id="s-them"></div><div class="l">codes picked by hand each month, typical tool</div></div>
-        <div class="stat"><div class="n" id="s-us"></div><div class="l">codes confirmed each month, Ottimate</div></div>
+        <div class="stat"><div class="n" id="s-them"></div><div class="l">fields mapped by hand each month, typical tool</div></div>
+        <div class="stat"><div class="n" id="s-us"></div><div class="l">fields confirmed each month, Ottimate</div></div>
         <div class="stat win"><div class="n" id="s-hrs"></div><div class="l">hours back per month</div></div>
         <div class="stat win"><div class="n" id="s-yr"></div><div class="l">hours back per year</div></div>
         <div class="stat wide"><div class="l" id="s-fte"></div></div>
@@ -258,7 +264,7 @@
         <div class="flow">
           <div class="step"><div class="num">1</div><div><b>Everything lands in one pile</b><span>Every store and department mixed together.</span></div></div>
           <div class="step"><div class="num">2</div><div><b>Someone reads each invoice</b><span>Works out which entity, store and department it belongs to.</span></div></div>
-          <div class="step"><div class="num">3</div><div><b>Codes it by hand</b><span>Picks every code on the invoice.</span></div></div>
+          <div class="step"><div class="num">3</div><div><b>Maps it by hand</b><span>Maps entity, location, department and GL account on every invoice.</span></div></div>
           <div class="step"><div class="num">4</div><div><b>Chases the right approver</b><span>Forwards it and hopes it reaches the right manager.</span></div></div>
         </div>
       </div>
@@ -268,7 +274,7 @@
         <div class="flow">
           <div class="step"><div class="num">1</div><div><b>One email address</b><span>Vendors and staff send every invoice to the same place.</span></div></div>
           <div class="step"><div class="num">2</div><div><b>Placed automatically</b><span>Ship-to address, customer number or ZIP code tell Ottimate which store it belongs to.</span></div></div>
-          <div class="step"><div class="num">3</div><div><b>Arrives already coded</b><span>The store and department codes fill in the moment it lands.</span></div></div>
+          <div class="step"><div class="num">3</div><div><b>Arrives already coded</b><span>Entity, location and department fill in the moment it lands.</span></div></div>
           <div class="step"><div class="num">4</div><div><b>Goes straight to the right manager</b><span>The deli manager approves deli invoices, the spa manager approves spa invoices.</span></div></div>
         </div>
       </div>
@@ -285,11 +291,11 @@
   <div class="card method">
     <h3>How the numbers work</h3>
     <ul>
-      <li>"Coding" means choosing one part of the GL string on an invoice. The saving is the share of those parts that Ottimate fills in from the invoice's location.</li>
-      <li>3-part example: the store and department fill in, and Natural GL is left to confirm. That is 2 of 3 parts, or 67%.</li>
-      <li>4-part example: entity, store and department fill in, and Natural GL is left to confirm. That is 3 of 4 parts, or 75%.</li>
-      <li>Natural GL often fills in from the vendor's default GL. The counts above still treat it as work, so the saving is understated for those vendors.</li>
-      <li>Hours = invoices × parts Ottimate fills in × seconds per part. The example counts one coding pass per invoice, and invoices with many separately coded lines save more.</li>
+      <li>"Mapping" means choosing the value for one field on an invoice. The saving is the share of those fields that Ottimate fills in from where the invoice lands.</li>
+      <li>3-field example: location and department fill in, and GL account is left to confirm. That is 2 of 3 fields, or 67%.</li>
+      <li>4-field example: entity, location and department fill in, and GL account is left to confirm. That is 3 of 4 fields, or 75%.</li>
+      <li>GL account often fills in from the vendor's default GL, and other fields such as class or project can fill in by location or rule. The counts above still treat those as work, so the saving is understated.</li>
+      <li>Hours = invoices × fields Ottimate fills in × seconds per field. The example counts one coding pass per invoice, and invoices with many separately coded lines save more.</li>
       <li>"Up to" because invoices split across several stores, or needing a manual override, save less.</li>
     </ul>
   </div>
@@ -299,23 +305,23 @@
 
 <script>
 const SEG = {
-  entity:   { name: "Entity",     what: "Which company / LLC",  by: "Filled by company" },
-  natural:  { name: "Natural GL", what: "What was bought" },
-  location: { name: "Location",   what: "Which store",          by: "Filled by store" },
-  dept:     { name: "Department", what: "Which department",     by: "Filled by department" },
+  entity:   { name: "Entity",     what: "Which company or LLC", by: "Set by company", tok: "ENTITY" },
+  location: { name: "Location",   what: "Which store or site",  by: "Set by location", tok: "LOCATION" },
+  dept:     { name: "Department", what: "Which department",     by: "Set by location", tok: "DEPT" },
+  natural:  { name: "GL account", what: "What was bought",      tok: "GL ACCOUNT" },
 };
 const MODES = {
-  three: { order: ["natural", "location", "dept"], codes: { natural: "5100", location: "100", dept: "30" },
-           note: "3-part GL string: Natural GL, Location, Department. The store and department fill in, so your team handles 1 code instead of 3." },
-  four:  { order: ["entity", "natural", "location", "dept"], codes: { entity: "01", natural: "5100", location: "100", dept: "30" },
-           note: "4-part GL string: Entity, Natural GL, Location, Department. The company, store and department fill in, so your team handles 1 code instead of 4." },
+  three: { order: ["location", "dept", "natural"],
+           note: "3-field coding: Location, Department, GL account. Location and department fill in, so your team handles 1 field instead of 3." },
+  four:  { order: ["entity", "location", "dept", "natural"],
+           note: "4-field coding: Entity, Location, Department, GL account. Entity, location and department fill in, so your team handles 1 field instead of 4." },
 };
 let mode = "four";
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString("en-US");
 
 function glHTML(m) {
-  return m.order.map(k => `<span class="c-${k}">${m.codes[k]}</span>`).join('<span class="dash">-</span>');
+  return m.order.map(k => `<span class="c-${k}">${SEG[k].tok}</span>`).join('<span class="dash">-</span>');
 }
 function segHTML(k, pill, cls) {
   return `<div class="seg"><div class="dot d-${k}"></div><div class="nm">${SEG[k].name}<small>${SEG[k].what}</small></div><span class="pill ${cls}">${pill}</span></div>`;
@@ -325,23 +331,13 @@ function render() {
   const m = MODES[mode], total = m.order.length, filled = total - 1;
   document.querySelectorAll(".toggle button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
   $("gl-them").innerHTML = $("gl-us").innerHTML = glHTML(m);
-  $("segs-them").innerHTML = m.order.map(k => segHTML(k, "Picked by hand", "p-hand")).join("");
+  $("segs-them").innerHTML = m.order.map(k => segHTML(k, "Mapped by hand", "p-hand")).join("");
   $("segs-us").innerHTML = m.order.map(k => k === "natural"
-    ? segHTML(k, "Vendor default, just confirm", "p-confirm")
+    ? segHTML(k, "Suggested, just confirm", "p-confirm")
     : segHTML(k, SEG[k].by, "p-auto")).join("");
-  $("tally-them").textContent = `${total} of ${total} codes picked by hand`;
-  $("tally-us").textContent = `${filled} of ${total} filled in automatically: ${Math.round(filled / total * 100)}% less coding`;
+  $("tally-them").textContent = `${total} of ${total} fields mapped by hand`;
+  $("tally-us").textContent = `${filled} of ${total} filled in automatically: ${Math.round(filled / total * 100)}% less mapping`;
   $("mode-note").textContent = m.note;
-
-  const lv = [];
-  if (m.order.includes("entity")) lv.push(["l-co", "Company", "Main Street Holdings LLC", ["Entity " + m.codes.entity]]);
-  lv.push(["l-gr", "Store", "Main Street Market", ["Location " + m.codes.location]]);
-  lv.push(["l-lo", "Department", "Deli & Bakery", ["Dept " + m.codes.dept]]);
-  lv.push(["l-ve", "Vendor", "Sysco", ["Natural GL " + m.codes.natural]]);
-  lv.push(["l-inv", "Invoice arrives coded", "Nobody picked a code", [glHTML(m)]]);
-  $("tree").style.gridTemplateColumns = window.matchMedia("(max-width: 760px)").matches ? "" : `repeat(${lv.length}, 1fr)`;
-  $("tree").innerHTML = lv.map(([c, k, v, f]) =>
-    `<div class="lvl ${c}"><div class="k">${k}</div><div class="v">${v}</div>${f.map(x => `<span class="fix">${x}</span>`).join("")}</div>`).join("");
 
   const inv = +$("vol").value, secs = Math.max(1, +$("secs").value || 15);
   const hrs = inv * filled * secs / 3600;
@@ -356,7 +352,6 @@ function render() {
 document.querySelectorAll(".toggle button").forEach(b => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
 $("vol").addEventListener("input", render);
 $("secs").addEventListener("input", render);
-window.addEventListener("resize", render);
 render();
 </script>
 </body>
