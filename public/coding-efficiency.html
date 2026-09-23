@@ -92,7 +92,16 @@
   .l-co { border-color:var(--indigo-300); background:var(--indigo-50); color:var(--indigo-700); }
   .l-gr { border-color:var(--blue-200); background:var(--blue-50); color:var(--blue-700); }
   .l-lo { border-color:var(--purple-300); background:var(--purple-50); color:var(--purple-700); }
-  .l-inv { border-color:var(--emerald-400); background:var(--emerald-50); color:var(--emerald-800); }
+  .l-ve { border-color:var(--emerald-300); background:var(--emerald-50); color:var(--emerald-700); }
+  .l-inv { border-color:var(--slate-800); background:var(--slate-800); color:#fff; }
+  .l-inv .k { color:var(--slate-400); opacity:1; }
+  .l-inv .fix { background:transparent; font-size:1rem; font-weight:700; letter-spacing:.06em; padding:0; }
+  .scene { border:2px solid var(--emerald-300); }
+  .scene h3 { font-size:1.05rem; }
+  .scene .lvl { padding:1rem; }
+  .scene .lvl .v { font-size:.95rem; }
+  .scene-foot { margin-top:.9rem; font-size:.8rem; color:var(--emerald-800); background:var(--emerald-50);
+                border:1px solid var(--emerald-200); border-radius:.5rem; padding:.6rem .75rem; }
   .lvl:not(:last-child)::after { content:"→"; position:absolute; right:-.55rem; top:50%; transform:translate(50%,-50%);
                                  color:var(--slate-400); font-weight:700; z-index:1; }
 
@@ -137,6 +146,7 @@
     .lvl:not(:last-child)::after { display:none; }
     .hero h2 { font-size:1.4rem; }
     .teams { grid-template-columns:1fr; }
+    .l-inv { grid-column:1 / -1; }
   }
 </style>
 <script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
@@ -161,6 +171,18 @@
 </section>
 
 <main class="wrap">
+
+  <!-- Behind the scenes: the centerpiece -->
+  <div class="card scene">
+    <div class="card-head">
+      <div>
+        <h3>Behind the scenes: your team never makes these coding calls</h3>
+        <p class="cap">Set up once, each level fills its own part of the GL string on every invoice.</p>
+      </div>
+    </div>
+    <div class="tree" id="tree"></div>
+    <div class="scene-foot"><b>Set up correctly, nobody on your team picks a code.</b> They just approve the invoice.</div>
+  </div>
 
   <!-- 1. Side by side -->
   <div class="card">
@@ -191,17 +213,6 @@
       </div>
     </div>
     <div class="note" id="mode-note"></div>
-  </div>
-
-  <!-- 2. How the structure does it -->
-  <div class="card">
-    <div class="card-head">
-      <div>
-        <h3>How it works: codes live on your structure, not on the invoice</h3>
-        <p class="cap">Each level holds the codes it owns, and an invoice picks them all up on arrival.</p>
-      </div>
-    </div>
-    <div class="tree" id="tree"></div>
   </div>
 
   <!-- 3. Volume calculator -->
@@ -316,7 +327,7 @@ function render() {
   $("gl-them").innerHTML = $("gl-us").innerHTML = glHTML(m);
   $("segs-them").innerHTML = m.order.map(k => segHTML(k, "Picked by hand", "p-hand")).join("");
   $("segs-us").innerHTML = m.order.map(k => k === "natural"
-    ? segHTML(k, "Confirm", "p-confirm")
+    ? segHTML(k, "Vendor default, just confirm", "p-confirm")
     : segHTML(k, SEG[k].by, "p-auto")).join("");
   $("tally-them").textContent = `${total} of ${total} codes picked by hand`;
   $("tally-us").textContent = `${filled} of ${total} filled in automatically: ${Math.round(filled / total * 100)}% less coding`;
@@ -326,7 +337,8 @@ function render() {
   if (m.order.includes("entity")) lv.push(["l-co", "Company", "Main Street Holdings LLC", ["Entity " + m.codes.entity]]);
   lv.push(["l-gr", "Store", "Main Street Market", ["Location " + m.codes.location]]);
   lv.push(["l-lo", "Department", "Deli & Bakery", ["Dept " + m.codes.dept]]);
-  lv.push(["l-inv", "Invoice lands here", "Arrives coded", ["GL " + m.order.map(k => m.codes[k]).join("-")]]);
+  lv.push(["l-ve", "Vendor", "Sysco", ["Natural GL " + m.codes.natural]]);
+  lv.push(["l-inv", "Invoice arrives coded", "Nobody picked a code", [glHTML(m)]]);
   $("tree").style.gridTemplateColumns = window.matchMedia("(max-width: 760px)").matches ? "" : `repeat(${lv.length}, 1fr)`;
   $("tree").innerHTML = lv.map(([c, k, v, f]) =>
     `<div class="lvl ${c}"><div class="k">${k}</div><div class="v">${v}</div>${f.map(x => `<span class="fix">${x}</span>`).join("")}</div>`).join("");
