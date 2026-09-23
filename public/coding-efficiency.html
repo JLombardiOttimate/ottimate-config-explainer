@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ottimate Multi-Entity Coding</title>
+<style>
+  :root {
+    --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-300:#cbd5e1; --slate-400:#94a3b8;
+    --slate-500:#64748b; --slate-600:#475569; --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+    --blue-50:#eff6ff; --blue-100:#dbeafe; --blue-200:#bfdbfe; --blue-400:#60a5fa; --blue-500:#3b82f6; --blue-600:#2563eb; --blue-700:#1d4ed8; --blue-800:#1e40af;
+    --emerald-50:#ecfdf5; --emerald-100:#d1fae5; --emerald-200:#a7f3d0; --emerald-300:#6ee7b7; --emerald-400:#34d399; --emerald-500:#10b981; --emerald-600:#059669; --emerald-700:#047857; --emerald-800:#065f46;
+    --purple-50:#faf5ff; --purple-300:#d8b4fe; --purple-400:#c084fc; --purple-700:#7e22ce;
+    --indigo-50:#eef2ff; --indigo-300:#a5b4fc; --indigo-400:#818cf8; --indigo-700:#4338ca;
+    --amber-50:#fffbeb; --amber-200:#fde68a; --amber-800:#92400e;
+    --red-50:#fef2f2; --red-200:#fecaca; --red-700:#b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Segoe UI', system-ui, -apple-system, sans-serif; color:var(--slate-800);
+         background:linear-gradient(135deg, var(--slate-50), var(--slate-100)); min-height:100vh; }
+  .wrap { max-width:72rem; margin:0 auto; padding:0 1.5rem; }
+
+  /* Header, same as the configuration explainer */
+  header { background:var(--slate-900); color:#fff; padding:1.25rem 0; }
+  .brand { display:flex; align-items:center; gap:.75rem; margin-bottom:.25rem; }
+  .badge { background:var(--blue-600); font-weight:700; font-size:.875rem; padding:.25rem .625rem; border-radius:.25rem; }
+  header h1 { font-size:1.125rem; margin:0; letter-spacing:-.01em; }
+  header p { margin:0; color:var(--slate-400); font-size:.75rem; }
+  html.embedded header, html.embedded .foot { display:none; }
+  html.embedded body { background:transparent; min-height:0; }
+  html.embedded .wrap { padding:0; }
+
+  /* Hero */
+  .hero { background:var(--blue-50); border-bottom:1px solid var(--blue-100); padding:2rem 0; }
+  .hero-grid { display:grid; grid-template-columns:1fr auto; gap:2rem; align-items:center; }
+  .hero h2 { font-size:1.75rem; line-height:1.2; margin:0 0 .5rem; color:var(--slate-900); letter-spacing:-.02em; }
+  .hero p { margin:0; color:var(--blue-800); font-size:.95rem; max-width:40rem; }
+  .big { text-align:center; background:#fff; border:2px solid var(--emerald-400); border-radius:1rem; padding:1rem 1.75rem; }
+  .big .n { font-size:3rem; font-weight:800; color:var(--emerald-600); line-height:1; }
+  .big .l { font-size:.75rem; color:var(--emerald-700); font-weight:600; margin-top:.35rem; }
+
+  main { padding:1.5rem 0 2rem; display:grid; gap:1.5rem; }
+  html.embedded main { padding:0; }
+  .card { background:#fff; border:1px solid var(--slate-200); border-radius:.75rem; box-shadow:0 1px 2px rgba(0,0,0,.05); padding:1.25rem; }
+  .card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+  .card h3 { font-size:.95rem; margin:0; color:var(--slate-800); }
+  .cap { font-size:.72rem; color:var(--slate-400); margin:.2rem 0 0; }
+
+  /* Mode toggle, same shape as the explainer's configuration-mode switch */
+  .toggles { display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; }
+  .toggles .tl { font-size:.66rem; font-weight:700; color:var(--slate-400); text-transform:uppercase; letter-spacing:.05em; margin-right:.35rem; }
+  .toggle { display:flex; align-items:center; }
+  .toggle button { border:0; cursor:pointer; font:inherit; font-size:.75rem; font-weight:600; padding:.4rem .8rem;
+                   background:var(--slate-100); color:var(--slate-500); }
+  .toggle button:first-of-type { border-radius:.5rem 0 0 .5rem; }
+  .toggle button:last-of-type { border-radius:0 .5rem .5rem 0; }
+  .toggle button[aria-pressed="true"] { background:var(--blue-600); color:#fff; }
+
+  /* Side by side */
+  .vs { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .side { border:2px solid; border-radius:.75rem; padding:1rem; }
+  .side.them { border-color:var(--slate-200); background:var(--slate-50); }
+  .side.us { border-color:var(--emerald-300); background:var(--emerald-50); }
+  .side-title { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:.25rem; }
+  .them .side-title { color:var(--slate-500); }
+  .us .side-title { color:var(--emerald-700); }
+  .side-sub { font-size:.8rem; color:var(--slate-600); margin-bottom:.75rem; }
+  .gl { font-family:ui-monospace, Menlo, Consolas, monospace; background:var(--slate-800); color:#fff; border-radius:.5rem;
+        padding:.5rem .75rem; text-align:center; font-weight:700; letter-spacing:.06em; margin-bottom:.75rem; }
+  .gl .dash { color:var(--slate-500); }
+  .c-entity { color:var(--indigo-300); } .c-natural { color:var(--emerald-400); } .c-location { color:var(--blue-400); } .c-dept { color:var(--purple-400); }
+  .segs { display:grid; gap:.4rem; }
+  .seg { display:flex; align-items:center; gap:.6rem; background:#fff; border:1px solid var(--slate-200); border-radius:.5rem; padding:.5rem .6rem; }
+  .dot { width:.6rem; height:.6rem; border-radius:50%; flex:none; }
+  .d-entity { background:var(--indigo-400); } .d-natural { background:var(--emerald-400); } .d-location { background:var(--blue-400); } .d-dept { background:var(--purple-400); }
+  .seg .nm { font-size:.8rem; font-weight:600; flex:1; }
+  .seg .nm small { display:block; font-weight:400; color:var(--slate-400); font-size:.68rem; }
+  .pill { font-size:.66rem; font-weight:600; padding:.15rem .5rem; border-radius:999px; white-space:nowrap; }
+  .p-hand { background:var(--red-50); color:var(--red-700); border:1px solid var(--red-200); }
+  .p-auto { background:var(--emerald-100); color:var(--emerald-700); border:1px solid var(--emerald-200); }
+  .p-confirm { background:var(--amber-50); color:var(--amber-800); border:1px solid var(--amber-200); }
+  .tally { margin-top:.75rem; font-size:.8rem; font-weight:700; text-align:center; padding:.5rem; border-radius:.5rem; }
+  .them .tally { background:var(--slate-200); color:var(--slate-700); }
+  .us .tally { background:var(--emerald-500); color:#fff; }
+  .note { margin-top:1rem; font-size:.75rem; border-radius:.5rem; padding:.75rem; background:var(--blue-50); border:1px solid var(--blue-200); color:var(--blue-800); }
+
+  /* Behind the scenes: ERP fields strip */
+  .scene { border:2px solid var(--emerald-300); }
+  .scene h3 { font-size:1.05rem; }
+  .fields { display:grid; grid-template-columns:repeat(5, 1fr); gap:.5rem; }
+  .tok { font-family:ui-monospace, Menlo, Consolas, monospace; font-weight:700; font-size:.78rem; letter-spacing:.05em;
+         background:var(--slate-800); text-align:center; padding:.6rem .25rem; }
+  .tok:first-child { border-radius:.5rem 0 0 .5rem; } .tok:nth-child(5) { border-radius:0 .5rem .5rem 0; }
+  .c-other { color:var(--slate-300); }
+  .fld { border:2px solid var(--slate-200); border-radius:.75rem; padding:.85rem; background:#fff; display:flex; flex-direction:column; gap:.35rem; }
+  .fld.auto { border-color:var(--emerald-300); background:var(--emerald-50); }
+  .fld .nm { font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.4rem; }
+  .fld .what { font-size:.72rem; color:var(--slate-500); }
+  .fld .pill { align-self:flex-start; margin-top:.2rem; }
+  .fld .how { font-size:.72rem; color:var(--slate-600); }
+  .bracket { font-size:.75rem; font-weight:700; text-align:center; padding:.45rem; border-radius:.5rem; }
+  .b-us { grid-column:1 / 4; background:var(--emerald-500); color:#fff; }
+  .b-team { grid-column:4 / 6; background:var(--slate-100); color:var(--slate-600); }
+  .p-rule { background:var(--slate-100); color:var(--slate-600); border:1px solid var(--slate-200); }
+  .scene-foot { margin-top:.9rem; font-size:.8rem; color:var(--emerald-800); background:var(--emerald-50);
+                border:1px solid var(--emerald-200); border-radius:.5rem; padding:.6rem .75rem; }
+
+  /* Calculator */
+  .calc { display:grid; grid-template-columns:1.2fr 1fr; gap:1.5rem; align-items:center; }
+  label { font-size:.72rem; font-weight:700; color:var(--slate-500); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:.35rem; }
+  .vol { font-size:1.75rem; font-weight:800; color:var(--slate-900); }
+  .vol small { font-size:.8rem; color:var(--slate-400); font-weight:500; }
+  input[type=range] { width:100%; accent-color:var(--blue-600); margin:.25rem 0 1rem; }
+  .secs { display:flex; align-items:center; gap:.5rem; font-size:.8rem; color:var(--slate-600); }
+  .secs input { width:4.5rem; font:inherit; font-weight:700; text-align:center; border:1px solid var(--slate-300); border-radius:.4rem; padding:.3rem; }
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  .stat { border-radius:.75rem; padding:.9rem; text-align:center; background:var(--slate-50); border:1px solid var(--slate-200); }
+  .stat .n { font-size:1.6rem; font-weight:800; color:var(--slate-900); }
+  .stat .l { font-size:.7rem; color:var(--slate-500); margin-top:.15rem; }
+  .stat.win { background:var(--emerald-50); border-color:var(--emerald-300); }
+  .stat.win .n { color:var(--emerald-600); }
+  .stat.wide { grid-column:1 / -1; }
+
+  /* Inbox panel */
+  .flow { display:grid; gap:.5rem; }
+  .step { display:flex; gap:.6rem; align-items:flex-start; background:#fff; border:1px solid var(--emerald-200); border-radius:.5rem; padding:.55rem .65rem; font-size:.8rem; }
+  .them .step { border-color:var(--slate-200); }
+  .num { flex:none; width:1.4rem; height:1.4rem; border-radius:.35rem; display:flex; align-items:center; justify-content:center;
+         font-size:.7rem; font-weight:700; color:#fff; background:var(--emerald-500); }
+  .them .num { background:var(--slate-400); }
+  .step b { display:block; font-size:.8rem; }
+  .step span { color:var(--slate-500); font-size:.72rem; }
+  .teams { display:grid; grid-template-columns:repeat(3, 1fr); gap:.5rem; margin-top:1rem; }
+  .team { text-align:center; border:1px solid var(--slate-200); border-radius:.6rem; padding:.6rem; background:var(--slate-50); font-size:.75rem; }
+  .team b { display:block; font-size:.8rem; color:var(--slate-800); }
+
+  .method { font-size:.72rem; color:var(--slate-500); }
+  .method h3 { font-size:.8rem; color:var(--slate-600); margin:0 0 .4rem; }
+  .method ul { margin:0; padding-left:1.1rem; display:grid; gap:.25rem; }
+  .foot { text-align:center; font-size:.65rem; color:var(--slate-400); padding:0 0 1.5rem; }
+
+  @media (max-width: 760px) {
+    .wrap { padding:0 1rem; }
+    .hero-grid, .vs, .calc { grid-template-columns:1fr; }
+    .fields { grid-template-columns:1fr; }
+    .tok, .bracket { display:none; }
+    .hero h2 { font-size:1.4rem; }
+    .teams { grid-template-columns:1fr; }
+  }
+</style>
+<script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand"><div class="badge">OTTIMATE</div><h1>Multi-Entity Coding</h1></div>
+    <p>Why invoices arrive in Ottimate already coded, and what that is worth at your volume</p>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h2>Set your structure once. Every invoice lands already coded.</h2>
+      <p>Before an invoice can post to your ERP, it has to be coded to an entity, a location, a department and a GL account, and often more. Ottimate fills in entity, location and department from your setup, so your team never maps them. Typical AP tools fill one or two fields at most and leave the rest to your team.</p>
+    </div>
+    <div class="big"><div class="n">Up to 75%</div><div class="l">of every invoice coded by your structure</div></div>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <!-- Behind the scenes: the centerpiece -->
+  <div class="card scene">
+    <div class="card-head">
+      <div>
+        <h3>Behind the scenes: what your ERP needs on every invoice, and who fills it in</h3>
+        <p class="cap">Your ERP only accepts an invoice once every one of these fields is coded.</p>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="tok c-entity">ENTITY</div><div class="tok c-location">LOCATION</div><div class="tok c-dept">DEPARTMENT</div><div class="tok c-natural">GL ACCOUNT</div><div class="tok c-other">OTHER</div>
+      <div class="bracket b-us">Ottimate handles these. Your team never maps them.</div>
+      <div class="bracket b-team">Your team confirms, with suggestions</div>
+      <div class="fld auto"><div class="nm"><span class="dot d-entity"></span>Entity</div><div class="what">Which company or LLC</div><span class="pill p-auto">Never mapped</span><div class="how">Set by your company structure.</div></div>
+      <div class="fld auto"><div class="nm"><span class="dot d-location"></span>Location</div><div class="what">Which store or site</div><span class="pill p-auto">Never mapped</span><div class="how">Set by the location the invoice lands in.</div></div>
+      <div class="fld auto"><div class="nm"><span class="dot d-dept"></span>Department</div><div class="what">Which department</div><span class="pill p-auto">Never mapped</span><div class="how">Set by the location, or the department within it.</div></div>
+      <div class="fld"><div class="nm"><span class="dot d-natural"></span>GL account</div><div class="what">What was bought</div><span class="pill p-confirm">Confirm</span><div class="how">Suggested by the vendor's default GL or your mapping rules.</div></div>
+      <div class="fld"><div class="nm"><span class="dot" style="background:var(--slate-400)"></span>Other fields</div><div class="what">Class, project, fund and more</div><span class="pill p-rule">By rule</span><div class="how">Filled by location or rule wherever the value is fixed.</div></div>
+    </div>
+    <div class="scene-foot"><b>Typical AP tools fill one or two of these at most, usually the GL account from a vendor default.</b> The rest falls to your team on every invoice. Taking entity, location and department off the table is time other AP software cannot give back.</div>
+  </div>
+
+  <!-- 1. Side by side -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h3>What your team maps on every invoice</h3>
+        <p class="cap">The more fields your ERP needs, the more Ottimate fills in for you.</p>
+      </div>
+      <div class="toggles">
+        <div class="toggle" role="group" aria-label="Fields your ERP needs"><span class="tl">Your ERP needs</span>
+          <button type="button" data-mode="three" aria-pressed="false">3 fields</button>
+          <button type="button" data-mode="four" aria-pressed="true">4 fields</button>
+        </div>
+        <div class="toggle" role="group" aria-label="Fields a typical tool fills"><span class="tl">Typical tool fills</span>
+          <button type="button" data-them="1" aria-pressed="false">1 field</button>
+          <button type="button" data-them="2" aria-pressed="true">2 fields</button>
+        </div>
+      </div>
+    </div>
+    <div class="vs">
+      <div class="side them">
+        <div class="side-title">Typical AP tool</div>
+        <div class="side-sub">Fills a field or two. Someone maps the rest.</div>
+        <div class="gl" id="gl-them"></div>
+        <div class="segs" id="segs-them"></div>
+        <div class="tally" id="tally-them"></div>
+      </div>
+      <div class="side us">
+        <div class="side-title">Ottimate</div>
+        <div class="side-sub">The invoice inherits its coding from where it lands.</div>
+        <div class="gl" id="gl-us"></div>
+        <div class="segs" id="segs-us"></div>
+        <div class="tally" id="tally-us"></div>
+      </div>
+    </div>
+    <div class="note" id="mode-note"></div>
+  </div>
+
+  <!-- 3. Volume calculator -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h3>What that is worth at your volume</h3>
+        <p class="cap">Slide to your monthly invoice count.</p>
+      </div>
+    </div>
+    <div class="calc">
+      <div>
+        <label for="vol">Invoices per month</label>
+        <div class="vol"><span id="vol-out">3,000</span> <small>invoices / month</small></div>
+        <input type="range" id="vol" min="100" max="25000" step="100" value="3000" />
+        <div class="secs">
+          <label for="secs" style="margin:0">Seconds to map one field</label>
+          <input type="number" id="secs" min="1" max="120" value="15" />
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="n" id="s-them"></div><div class="l">fields mapped by hand each month, typical tool</div></div>
+        <div class="stat"><div class="n" id="s-us"></div><div class="l">fields mapped by hand each month, Ottimate</div></div>
+        <div class="stat win"><div class="n" id="s-hrs"></div><div class="l">hours back per month</div></div>
+        <div class="stat win"><div class="n" id="s-yr"></div><div class="l">hours back per year</div></div>
+        <div class="stat wide"><div class="l" id="s-fte"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. One inbox -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h3>One inbox, every team</h3>
+        <p class="cap">Send everything to one address, and each invoice finds its own store, department and approver.</p>
+      </div>
+    </div>
+    <div class="vs">
+      <div class="side them">
+        <div class="side-title">Typical AP tool</div>
+        <div class="side-sub">One shared inbox becomes one person's full-time job.</div>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><div><b>Everything lands in one pile</b><span>Every store and department mixed together.</span></div></div>
+          <div class="step"><div class="num">2</div><div><b>Someone reads each invoice</b><span>Works out which entity, store and department it belongs to.</span></div></div>
+          <div class="step"><div class="num">3</div><div><b>Maps it by hand</b><span>Maps every field the tool cannot fill, on every invoice.</span></div></div>
+          <div class="step"><div class="num">4</div><div><b>Chases the right approver</b><span>Forwards it and hopes it reaches the right manager.</span></div></div>
+        </div>
+      </div>
+      <div class="side us">
+        <div class="side-title">Ottimate</div>
+        <div class="side-sub">The invoice sorts itself, and people only do their part.</div>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><div><b>One email address</b><span>Vendors and staff send every invoice to the same place.</span></div></div>
+          <div class="step"><div class="num">2</div><div><b>Placed automatically</b><span>Ship-to address, customer number or ZIP code tell Ottimate which store it belongs to.</span></div></div>
+          <div class="step"><div class="num">3</div><div><b>Arrives already coded</b><span>Entity, location and department fill in the moment it lands.</span></div></div>
+          <div class="step"><div class="num">4</div><div><b>Goes straight to the right manager</b><span>The deli manager approves deli invoices, the spa manager approves spa invoices.</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="teams">
+      <div class="team"><b>Store and department managers</b>See and approve only their own invoices.</div>
+      <div class="team"><b>Central AP</b>Sees every entity under one login, and only confirms what is left.</div>
+      <div class="team"><b>Finance leadership</b>Gets clean, fully coded books across every entity.</div>
+    </div>
+    <div class="note">Anything Ottimate cannot place goes to a <b>To Be Sorted</b> queue, so nothing gets lost. Invoices that span several stores can be split across them.</div>
+  </div>
+
+  <!-- How this was built -->
+  <div class="card method">
+    <h3>How the numbers work</h3>
+    <ul>
+      <li>"Mapping" means choosing the value for one field on an invoice by hand.</li>
+      <li>Both tools can suggest the GL account from a vendor default, so it counts the same on both sides and is left out of the saving.</li>
+      <li>A typical tool fills 1 field (GL account) or 2 (GL account, plus entity when each entity has its own inbox). The rest are mapped by hand.</li>
+      <li>Ottimate sets entity, location and department from where the invoice lands: 3 of 4 fields, or 75%. With 3 fields it is 2 of 3, or 67%.</li>
+      <li>Hours = invoices × fields the typical tool leaves to your team × seconds per field. One coding pass per invoice. Invoices with many separately coded lines save more.</li>
+      <li>"Up to" because invoices split across several locations, or needing a manual override, save less.</li>
+    </ul>
+  </div>
+</main>
+
+<div class="foot">Ottimate Multi-Entity Coding</div>
+
+<script>
+const SEG = {
+  entity:   { name: "Entity",     what: "Which company or LLC", by: "Set by company", tok: "ENTITY" },
+  location: { name: "Location",   what: "Which store or site",  by: "Set by location", tok: "LOCATION" },
+  dept:     { name: "Department", what: "Which department",     by: "Set by location", tok: "DEPT" },
+  natural:  { name: "GL account", what: "What was bought",      tok: "GL ACCOUNT" },
+};
+const MODES = {
+  three: { order: ["location", "dept", "natural"],
+           note: "3-field coding: Location, Department, GL account. Location and department fill in, and GL account is suggested." },
+  four:  { order: ["entity", "location", "dept", "natural"],
+           note: "4-field coding: Entity, Location, Department, GL account. Entity, location and department fill in, and GL account is suggested." },
+};
+let mode = "four", themAuto = 2;
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString("en-US");
+
+function glHTML(m) {
+  return m.order.map(k => `<span class="c-${k}">${SEG[k].tok}</span>`).join('<span class="dash">-</span>');
+}
+function segHTML(k, pill, cls) {
+  return `<div class="seg"><div class="dot d-${k}"></div><div class="nm">${SEG[k].name}<small>${SEG[k].what}</small></div><span class="pill ${cls}">${pill}</span></div>`;
+}
+
+function render() {
+  const m = MODES[mode], total = m.order.length, filled = total - 1;
+  // A typical tool fills GL account from a vendor default, and with 2 also the first field (separate inbox per entity or location).
+  const themFills = themAuto === 2 ? ["natural", m.order[0]] : ["natural"];
+  const hand = total - themFills.length;
+  document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
+  document.querySelectorAll("[data-them]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.them === themAuto));
+  $("gl-them").innerHTML = $("gl-us").innerHTML = glHTML(m);
+  $("segs-them").innerHTML = m.order.map(k => k === "natural" ? segHTML(k, "Vendor default", "p-confirm")
+    : themFills.includes(k) ? segHTML(k, "Separate inbox per " + SEG[k].name.toLowerCase(), "p-confirm")
+    : segHTML(k, "Mapped by hand", "p-hand")).join("");
+  $("segs-us").innerHTML = m.order.map(k => k === "natural"
+    ? segHTML(k, "Suggested, just confirm", "p-confirm")
+    : segHTML(k, SEG[k].by, "p-auto")).join("");
+  $("tally-them").textContent = `${hand} of ${total} fields mapped by hand`;
+  $("tally-us").textContent = `0 mapped by hand: ${filled} of ${total} set by your structure (${Math.round(filled / total * 100)}%)`;
+  $("mode-note").textContent = `${m.note} A typical tool fills ${themFills.length}, so your team still maps ${hand} by hand on every invoice there.`;
+
+  const inv = +$("vol").value, secs = Math.max(1, +$("secs").value || 15);
+  const hrs = inv * hand * secs / 3600;
+  $("vol-out").textContent = fmt(inv);
+  $("s-them").textContent = fmt(inv * hand);
+  $("s-us").textContent = "0";
+  $("s-hrs").textContent = fmt(hrs);
+  $("s-yr").textContent = fmt(hrs * 12);
+  $("s-fte").innerHTML = `That is about <b>${fmt(hrs * 12 / 40)}</b> working weeks of coding a year, freed up for review, vendor issues and close.`;
+}
+
+document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
+document.querySelectorAll("[data-them]").forEach(b => b.addEventListener("click", () => { themAuto = +b.dataset.them; render(); }));
+$("vol").addEventListener("input", render);
+$("secs").addEventListener("input", render);
+render();
+</script>
+</body>
+</html>

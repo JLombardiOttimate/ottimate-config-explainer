@@ -84,7 +84,7 @@ export default function OttimateConfigExplainer() {
   const [playing, setPlaying] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
   const [editingLoc, setEditingLoc] = useState(null);
-  const [showSection, setShowSection] = useState({ hierarchy: true, flow: true, routing: true });
+  const [showSection, setShowSection] = useState({ hierarchy: true, flow: true, routing: true, efficiency: true });
   const [selectedInvoice, setSelectedInvoice] = useState({ groupIdx: 0, locIdx: 0 });
 
   const info = PARADIGM_INFO[paradigm];
@@ -367,6 +367,12 @@ export default function OttimateConfigExplainer() {
           <RoutingDiagram paradigm={paradigm} groups={normalGroups} selectedGroup={selectedInvoice.groupIdx} selectedLoc={selectedInvoice.locIdx} />
         </Section>
 
+        {/* SECTION 4: Coding effort vs typical AP tools (same page is also served standalone) */}
+        <Section title="Coding Effort vs Typical AP Tools" subtitle="Up to 75% less coding per invoice, and what that is worth at your volume" open={showSection.efficiency} onToggle={() => setShowSection(s => ({ ...s, efficiency: !s.efficiency }))}>
+          <EmbeddedPage src={`${import.meta.env.BASE_URL}coding-efficiency.html`} />
+          <a href={`${import.meta.env.BASE_URL}coding-efficiency.html`} target="_blank" rel="noreferrer" className="inline-block mt-3 text-[11px] text-blue-600 hover:text-blue-800 font-medium">Open as a standalone page ↗</a>
+        </Section>
+
         <div className="text-center text-[10px] text-slate-400 py-4">Ottimate Multi-Entity Configuration Guide · Confidential</div>
       </div>
     </div>
@@ -409,6 +415,19 @@ function Section({ title, subtitle, open, onToggle, badge, children }) {
       {open && <div className="px-5 pb-5 border-t border-slate-100 pt-4">{children}</div>}
     </div>
   );
+}
+
+// Same-origin iframe that grows to fit its content, so the section has no inner scrollbar.
+function EmbeddedPage({ src }) {
+  const [height, setHeight] = useState(900);
+  const onLoad = useCallback(e => {
+    const body = e.target.contentDocument?.body;
+    if (!body) return;
+    const fit = () => setHeight(body.scrollHeight);
+    fit();
+    new ResizeObserver(fit).observe(body);
+  }, []);
+  return <iframe src={src} title="Coding effort vs typical AP tools" onLoad={onLoad} style={{ height }} className="w-full border-0 block" />;
 }
 
 function MappingBadge({ label, mapsTo, color }) {
