@@ -47,11 +47,13 @@
   .cap { font-size:.72rem; color:var(--slate-400); margin:.2rem 0 0; }
 
   /* Mode toggle, same shape as the explainer's configuration-mode switch */
-  .toggle { display:flex; }
+  .toggles { display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; }
+  .toggles .tl { font-size:.66rem; font-weight:700; color:var(--slate-400); text-transform:uppercase; letter-spacing:.05em; margin-right:.35rem; }
+  .toggle { display:flex; align-items:center; }
   .toggle button { border:0; cursor:pointer; font:inherit; font-size:.75rem; font-weight:600; padding:.4rem .8rem;
                    background:var(--slate-100); color:var(--slate-500); }
-  .toggle button:first-child { border-radius:.5rem 0 0 .5rem; }
-  .toggle button:last-child { border-radius:0 .5rem .5rem 0; }
+  .toggle button:first-of-type { border-radius:.5rem 0 0 .5rem; }
+  .toggle button:last-of-type { border-radius:0 .5rem .5rem 0; }
   .toggle button[aria-pressed="true"] { background:var(--blue-600); color:#fff; }
 
   /* Side by side */
@@ -161,9 +163,9 @@
   <div class="wrap hero-grid">
     <div>
       <h2>Set your structure once. Every invoice lands already coded.</h2>
-      <p>Before an invoice can post to your ERP, it has to be coded to an entity, a location, a department and a GL account, and often more. Ottimate fills in entity, location and department from your setup, so your team never maps them. Typical AP tools make your team map them on every invoice.</p>
+      <p>Before an invoice can post to your ERP, it has to be coded to an entity, a location, a department and a GL account, and often more. Ottimate fills in entity, location and department from your setup, so your team never maps them. Typical AP tools fill one or two fields at most and leave the rest to your team.</p>
     </div>
-    <div class="big"><div class="n">Up to 75%</div><div class="l">less mapping per invoice</div></div>
+    <div class="big"><div class="n">Up to 75%</div><div class="l">of every invoice coded by your structure</div></div>
   </div>
 </section>
 
@@ -187,7 +189,7 @@
       <div class="fld"><div class="nm"><span class="dot d-natural"></span>GL account</div><div class="what">What was bought</div><span class="pill p-confirm">Confirm</span><div class="how">Suggested by the vendor's default GL or your mapping rules.</div></div>
       <div class="fld"><div class="nm"><span class="dot" style="background:var(--slate-400)"></span>Other fields</div><div class="what">Class, project, fund and more</div><span class="pill p-rule">By rule</span><div class="how">Filled by location or rule wherever the value is fixed.</div></div>
     </div>
-    <div class="scene-foot"><b>Typical AP tools leave every one of these to your team, on every invoice.</b> Taking entity, location and department off the table is time other AP software cannot give back.</div>
+    <div class="scene-foot"><b>Typical AP tools fill one or two of these at most, usually the GL account from a vendor default.</b> The rest falls to your team on every invoice. Taking entity, location and department off the table is time other AP software cannot give back.</div>
   </div>
 
   <!-- 1. Side by side -->
@@ -197,15 +199,21 @@
         <h3>What your team maps on every invoice</h3>
         <p class="cap">The more fields your ERP needs, the more Ottimate fills in for you.</p>
       </div>
-      <div class="toggle" role="group" aria-label="Fields your ERP needs">
-        <button type="button" data-mode="three" aria-pressed="false">3 fields</button>
-        <button type="button" data-mode="four" aria-pressed="true">4 fields</button>
+      <div class="toggles">
+        <div class="toggle" role="group" aria-label="Fields your ERP needs"><span class="tl">Your ERP needs</span>
+          <button type="button" data-mode="three" aria-pressed="false">3 fields</button>
+          <button type="button" data-mode="four" aria-pressed="true">4 fields</button>
+        </div>
+        <div class="toggle" role="group" aria-label="Fields a typical tool fills"><span class="tl">Typical tool fills</span>
+          <button type="button" data-them="1" aria-pressed="false">1 field</button>
+          <button type="button" data-them="2" aria-pressed="true">2 fields</button>
+        </div>
       </div>
     </div>
     <div class="vs">
       <div class="side them">
         <div class="side-title">Typical AP tool</div>
-        <div class="side-sub">Every invoice starts blank. Someone maps each field.</div>
+        <div class="side-sub">Fills a field or two. Someone maps the rest.</div>
         <div class="gl" id="gl-them"></div>
         <div class="segs" id="segs-them"></div>
         <div class="tally" id="tally-them"></div>
@@ -241,7 +249,7 @@
       </div>
       <div class="stats">
         <div class="stat"><div class="n" id="s-them"></div><div class="l">fields mapped by hand each month, typical tool</div></div>
-        <div class="stat"><div class="n" id="s-us"></div><div class="l">fields confirmed each month, Ottimate</div></div>
+        <div class="stat"><div class="n" id="s-us"></div><div class="l">fields mapped by hand each month, Ottimate</div></div>
         <div class="stat win"><div class="n" id="s-hrs"></div><div class="l">hours back per month</div></div>
         <div class="stat win"><div class="n" id="s-yr"></div><div class="l">hours back per year</div></div>
         <div class="stat wide"><div class="l" id="s-fte"></div></div>
@@ -264,7 +272,7 @@
         <div class="flow">
           <div class="step"><div class="num">1</div><div><b>Everything lands in one pile</b><span>Every store and department mixed together.</span></div></div>
           <div class="step"><div class="num">2</div><div><b>Someone reads each invoice</b><span>Works out which entity, store and department it belongs to.</span></div></div>
-          <div class="step"><div class="num">3</div><div><b>Maps it by hand</b><span>Maps entity, location, department and GL account on every invoice.</span></div></div>
+          <div class="step"><div class="num">3</div><div><b>Maps it by hand</b><span>Maps every field the tool cannot fill, on every invoice.</span></div></div>
           <div class="step"><div class="num">4</div><div><b>Chases the right approver</b><span>Forwards it and hopes it reaches the right manager.</span></div></div>
         </div>
       </div>
@@ -291,12 +299,12 @@
   <div class="card method">
     <h3>How the numbers work</h3>
     <ul>
-      <li>"Mapping" means choosing the value for one field on an invoice. The saving is the share of those fields that Ottimate fills in from where the invoice lands.</li>
-      <li>3-field example: location and department fill in, and GL account is left to confirm. That is 2 of 3 fields, or 67%.</li>
-      <li>4-field example: entity, location and department fill in, and GL account is left to confirm. That is 3 of 4 fields, or 75%.</li>
-      <li>GL account often fills in from the vendor's default GL, and other fields such as class or project can fill in by location or rule. The counts above still treat those as work, so the saving is understated.</li>
-      <li>Hours = invoices × fields Ottimate fills in × seconds per field. The example counts one coding pass per invoice, and invoices with many separately coded lines save more.</li>
-      <li>"Up to" because invoices split across several stores, or needing a manual override, save less.</li>
+      <li>"Mapping" means choosing the value for one field on an invoice by hand.</li>
+      <li>Both tools can suggest the GL account from a vendor default, so it counts the same on both sides and is left out of the saving.</li>
+      <li>A typical tool fills 1 field (GL account) or 2 (GL account, plus entity when each entity has its own inbox). The rest are mapped by hand.</li>
+      <li>Ottimate sets entity, location and department from where the invoice lands: 3 of 4 fields, or 75%. With 3 fields it is 2 of 3, or 67%.</li>
+      <li>Hours = invoices × fields the typical tool leaves to your team × seconds per field. One coding pass per invoice. Invoices with many separately coded lines save more.</li>
+      <li>"Up to" because invoices split across several locations, or needing a manual override, save less.</li>
     </ul>
   </div>
 </main>
@@ -312,11 +320,11 @@ const SEG = {
 };
 const MODES = {
   three: { order: ["location", "dept", "natural"],
-           note: "3-field coding: Location, Department, GL account. Location and department fill in, so your team handles 1 field instead of 3." },
+           note: "3-field coding: Location, Department, GL account. Location and department fill in, and GL account is suggested." },
   four:  { order: ["entity", "location", "dept", "natural"],
-           note: "4-field coding: Entity, Location, Department, GL account. Entity, location and department fill in, so your team handles 1 field instead of 4." },
+           note: "4-field coding: Entity, Location, Department, GL account. Entity, location and department fill in, and GL account is suggested." },
 };
-let mode = "four";
+let mode = "four", themAuto = 2;
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString("en-US");
 
@@ -329,27 +337,34 @@ function segHTML(k, pill, cls) {
 
 function render() {
   const m = MODES[mode], total = m.order.length, filled = total - 1;
-  document.querySelectorAll(".toggle button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
+  // A typical tool fills GL account from a vendor default, and with 2 also the first field (separate inbox per entity or location).
+  const themFills = themAuto === 2 ? ["natural", m.order[0]] : ["natural"];
+  const hand = total - themFills.length;
+  document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
+  document.querySelectorAll("[data-them]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.them === themAuto));
   $("gl-them").innerHTML = $("gl-us").innerHTML = glHTML(m);
-  $("segs-them").innerHTML = m.order.map(k => segHTML(k, "Mapped by hand", "p-hand")).join("");
+  $("segs-them").innerHTML = m.order.map(k => k === "natural" ? segHTML(k, "Vendor default", "p-confirm")
+    : themFills.includes(k) ? segHTML(k, "Separate inbox per " + SEG[k].name.toLowerCase(), "p-confirm")
+    : segHTML(k, "Mapped by hand", "p-hand")).join("");
   $("segs-us").innerHTML = m.order.map(k => k === "natural"
     ? segHTML(k, "Suggested, just confirm", "p-confirm")
     : segHTML(k, SEG[k].by, "p-auto")).join("");
-  $("tally-them").textContent = `${total} of ${total} fields mapped by hand`;
-  $("tally-us").textContent = `${filled} of ${total} filled in automatically: ${Math.round(filled / total * 100)}% less mapping`;
-  $("mode-note").textContent = m.note;
+  $("tally-them").textContent = `${hand} of ${total} fields mapped by hand`;
+  $("tally-us").textContent = `0 mapped by hand: ${filled} of ${total} set by your structure (${Math.round(filled / total * 100)}%)`;
+  $("mode-note").textContent = `${m.note} A typical tool fills ${themFills.length}, so your team still maps ${hand} by hand on every invoice there.`;
 
   const inv = +$("vol").value, secs = Math.max(1, +$("secs").value || 15);
-  const hrs = inv * filled * secs / 3600;
+  const hrs = inv * hand * secs / 3600;
   $("vol-out").textContent = fmt(inv);
-  $("s-them").textContent = fmt(inv * total);
-  $("s-us").textContent = fmt(inv);
+  $("s-them").textContent = fmt(inv * hand);
+  $("s-us").textContent = "0";
   $("s-hrs").textContent = fmt(hrs);
   $("s-yr").textContent = fmt(hrs * 12);
   $("s-fte").innerHTML = `That is about <b>${fmt(hrs * 12 / 40)}</b> working weeks of coding a year, freed up for review, vendor issues and close.`;
 }
 
-document.querySelectorAll(".toggle button").forEach(b => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
+document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => { mode = b.dataset.mode; render(); }));
+document.querySelectorAll("[data-them]").forEach(b => b.addEventListener("click", () => { themAuto = +b.dataset.them; render(); }));
 $("vol").addEventListener("input", render);
 $("secs").addEventListener("input", render);
 render();
